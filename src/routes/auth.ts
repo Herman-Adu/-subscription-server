@@ -68,4 +68,60 @@ router.post(
     });
 });
 
+router.post("/login", async (req, res) => {
+  // get rmail and password from the body
+  const { email, password } = req.body;
+
+  // get the user
+  const user = await User.findOne({ email });
+
+  // return error if there is no user
+  if (!user) {
+    return res.json({
+      errors: [
+        {
+          msg: "Invalids credentials",
+        }
+      ],
+      data: null,
+    });
+  }
+
+  // compare the password passed in to the hashed password
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  // return error is there is no matvh
+  if (!isMatch) {
+    return res.json({
+      errors: [
+        {
+          msg: "Invalids credentials",
+        },
+      ],
+      data: null,
+    });
+  }
+
+  // create a JWT token
+  const token = await JWT.sign(
+    { email: user.email },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: 360000,
+    }
+  );
+
+  return res.json({
+    errors: [],
+    data: {
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+      },
+    },
+  });
+
+})
+
 export default router
