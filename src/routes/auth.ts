@@ -3,6 +3,7 @@ import { body, validationResult } from "express-validator";
 import User from "../models/user";
 import bcrypt from "bcryptjs";
 import JWT from "jsonwebtoken";
+import { checkAuth } from "../middleware/checkAuth";
 
 const router = express.Router();
 
@@ -122,6 +123,10 @@ router.post("/login", async (req, res) => {
     },
   });
 
-})
+});
+
+router.get("/me", checkAuth, async (req, res) => {
+  res.send(req.user)
+});
 
 export default router
