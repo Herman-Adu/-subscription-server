@@ -20,7 +20,7 @@ export const checkAuth = async (
     });
   }
 
-  // get the token
+  // split out berer and the token
   token = token.split(" ")[1];
 
   try {

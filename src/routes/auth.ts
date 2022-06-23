@@ -126,7 +126,34 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/me", checkAuth, async (req, res) => {
-  res.send(req.user)
+  
+  // get the user
+  const user = await User.findOne({ email: req.user });
+
+   // return error if there is no user
+  if (!user) {
+    return res.json({
+      errors: [
+        {
+          msg: "Invalids credentials",
+        }
+      ],
+      data: null,
+    });
+  }
+
+  // return the user
+  return res.json ({
+    errors: [],
+    data: {
+      user: {
+        id: user._id || null,
+        email: user.email
+      } || null,
+    }
+  })
+ 
+  
 });
 
 export default router
