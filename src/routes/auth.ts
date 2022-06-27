@@ -8,11 +8,10 @@ import { checkAuth } from "../middleware/checkAuth";
 const router = express.Router();
 
 router.post(
-    '/signup', 
-    body("email").isEmail().withMessage("The email is invalid"), 
-    body("password").isLength({ min: 5 }).withMessage("The password is invalid"), 
-    async (req, res)  => {
-
+  "/signup",
+  body("email").isEmail().withMessage("The email is invalid"),
+  body("password").isLength({ min: 5 }).withMessage("The password is invalid"),
+  async (req, res) => {
     const validationErrors = validationResult(req);
 
     if (!validationErrors.isEmpty()) {
@@ -25,10 +24,8 @@ router.post(
       return res.json({ errors, data: null });
     }
 
-    // Check if email is not already used:
     const { email, password } = req.body;
 
-    // check if email is in use
     const user = await User.findOne({ email });
 
     if (user) {
@@ -67,31 +64,27 @@ router.post(
         },
       },
     });
-});
+  }
+);
 
 router.post("/login", async (req, res) => {
-  // get rmail and password from the body
   const { email, password } = req.body;
 
-  // get the user
   const user = await User.findOne({ email });
 
-  // return error if there is no user
   if (!user) {
     return res.json({
       errors: [
         {
           msg: "Invalids credentials",
-        }
+        },
       ],
       data: null,
     });
   }
 
-  // compare the password passed in to the hashed password
   const isMatch = await bcrypt.compare(password, user.password);
 
-  // return error is there is no matvh
   if (!isMatch) {
     return res.json({
       errors: [
@@ -103,7 +96,6 @@ router.post("/login", async (req, res) => {
     });
   }
 
-  // create a JWT token
   const token = await JWT.sign(
     { email: user.email },
     process.env.JWT_SECRET as string,
@@ -122,38 +114,31 @@ router.post("/login", async (req, res) => {
       },
     },
   });
-
 });
 
 router.get("/me", checkAuth, async (req, res) => {
-  
-  // get the user
   const user = await User.findOne({ email: req.user });
 
-   // return error if there is no user
   if (!user) {
     return res.json({
       errors: [
         {
           msg: "Invalids credentials",
-        }
+        },
       ],
       data: null,
     });
   }
 
-  // return the user
-  return res.json ({
+  return res.json({
     errors: [],
     data: {
       user: {
-        id: user._id || null,
-        email: user.email
-      } || null,
-    }
-  })
- 
-  
+        id: user._id,
+        email: user.email,
+      },
+    },
+  });
 });
 
-export default router
+export default router;
